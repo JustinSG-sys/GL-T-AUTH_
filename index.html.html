@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GL&T · E-Authoring Tools</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --navy:    #0d1f2d;
+  --navy2:   #102030;
+  --panel:   #132638;
+  --panel2:  #1a3248;
+  --teal:    #00c4a0;
+  --teal2:   #00e5bc;
+  --teal-dim:rgba(0,196,160,.12);
+  --teal-border:rgba(0,196,160,.25);
+  --green:   #1a9a6e;
+  --white:   #ffffff;
+  --text:    #dde8f0;
+  --muted:   #7a9ab0;
+  --border:  rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.12);
+  --amber:   #f0b429;
+  --red:     #e05555;
+  --green-p: #2dc88a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, #0a1a28 0%, #0d2a1e 50%, #091f2a 100%);
+  border-bottom: 1px solid var(--border2);
+  padding: 22px 32px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute;
+  right: -80px; top: -80px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(0,196,160,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hdr-left { display:flex; flex-direction:column; gap:4px; }
+.hdr-eyebrow {
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 500;
+}
+.hdr-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -.3px;
+  line-height: 1.2;
+}
+.hdr-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.hdr-right {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.hdr-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.hdr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--teal-dim);
+  border: 1px solid var(--teal-border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--teal);
+  font-weight: 500;
+}
+.hdr-date { font-size: 11px; color: var(--muted); }
+
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.kpi {
+  background: var(--panel);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background .2s;
+}
+.kpi:hover { background: var(--panel2); }
+.kpi-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  font-weight: 500;
+}
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.5px;
+  line-height: 1;
+}
+.kpi-note { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.kpi-accent { color: var(--teal); }
+
+/* ── MAIN GRID ── */
+.main { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sec-label-text {
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.sec-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.card-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title { font-size: 13px; font-weight: 600; color: #fff; }
+.card-note { font-size: 11px; color: var(--muted); }
+
+/* ── MAIN TABLE ── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 960px; }
+thead tr { background: rgba(0,0,0,.25); }
+th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,196,160,.03); }
+
+/* ── TOOL CELL ── */
+.tool-cell { display: flex; flex-direction: column; gap: 2px; }
+.tool-name { font-weight: 600; font-size: 13px; color: #fff; }
+.tool-vendor { font-size: 11px; color: var(--muted); }
+
+/* ── TYPE BADGE ── */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.tb-scorm { background: rgba(59,130,246,.15); color: #7eb3f8; border: 1px solid rgba(59,130,246,.25); }
+.tb-ai    { background: rgba(167,139,250,.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,.25); }
+.tb-native{ background: rgba(0,196,160,.15); color: var(--teal); border: 1px solid var(--teal-border); }
+
+/* ── CURVE BADGE ── */
+.curve {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.c-easy   { background: rgba(45,200,138,.12); color: #6ee7b7; border:1px solid rgba(45,200,138,.2); }
+.c-mod    { background: rgba(240,180,41,.12); color: #fcd34d; border:1px solid rgba(240,180,41,.2); }
+.c-steep  { background: rgba(224,85,85,.12); color: #fca5a5; border:1px solid rgba(224,85,85,.2); }
+
+/* ── COST CELL ── */
+.cost-single { font-weight: 700; color: var(--teal); font-size: 13px; }
+.cost-ent { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.cost-note { font-size: 10.5px; color: rgba(122,154,176,.7); margin-top: 1px; }
+
+/* ── LICENSE BADGE ── */
+.lic {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.lic-free    { background: rgba(45,200,138,.1); color: #6ee7b7; border:1px solid rgba(45,200,138,.2); }
+.lic-admin   { background: rgba(240,180,41,.1); color: #fcd34d; border:1px solid rgba(240,180,41,.2); }
+.lic-locked  { background: rgba(224,85,85,.1); color: #fca5a5; border:1px solid rgba(224,85,85,.2); }
+
+/* ── SAP BADGE ── */
+.sap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sap-full    { background: rgba(45,200,138,.1); color: #6ee7b7; border:1px solid rgba(45,200,138,.2); }
+.sap-native  { background: rgba(0,196,160,.15); color: var(--teal); border:1px solid var(--teal-border); }
+.sap-partial { background: rgba(240,180,41,.1); color: #fcd34d; border:1px solid rgba(240,180,41,.2); }
+
+/* ── PROS / CONS INLINE ── */
+.pc-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.pc-list li { font-size: 11.5px; line-height: 1.45; display: flex; gap: 5px; align-items: flex-start; }
+.pro-dot { color: #6ee7b7; flex-shrink:0; }
+.con-dot { color: #fca5a5; flex-shrink:0; }
+
+/* ── BOTTOM ROW ── */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* ── CHART WRAP ── */
+.chart-inner { padding: 16px 20px 20px; }
+
+/* ── RECS GRID ── */
+.recs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 20px;
+}
+.rec-item {
+  background: rgba(0,0,0,.25);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  transition: border-color .2s;
+}
+.rec-item:hover { border-color: var(--teal-border); }
+.rec-use {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--teal);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.rec-tool { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.rec-why { font-size: 11px; color: var(--muted); line-height: 1.55; }
+
+/* ── NOTICE ── */
+.notice {
+  background: rgba(0,196,160,.05);
+  border: 1px solid var(--teal-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+}
+.notice-icon { color: var(--teal); flex-shrink:0; font-size: 13px; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.filter-label { font-size: 11px; color: var(--muted); margin-right: 4px; font-weight:500; }
+.fbtn {
+  padding: 5px 14px;
+  border-radius: 5px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.fbtn:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+.fbtn.active { background: var(--teal-dim); color: var(--teal); border-color: var(--teal-border); }
+
+/* ── LEGEND ── */
+.legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:10px; }
+.leg { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
+.leg-sq { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+
+/* scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:99px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     HEADER
+══════════════════════════════════ -->
+<header>
+  <div class="hdr-left">
+    <span class="hdr-eyebrow">Global Learning &amp; Transformation</span>
+    <span class="hdr-title">E-Authoring Tools</span>
+    <span class="hdr-sub">SCORM-compatible &amp; AI-powered tools evaluated for SAP SuccessFactors LMS</span>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-meta">
+      <span class="hdr-badge">
+        <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill="currentColor" opacity=".5"/><circle cx="4" cy="4" r="2" fill="currentColor"/></svg>
+        SAP SuccessFactors LMS Focus
+      </span>
+      <span class="hdr-date">Research: Q1 2026 &nbsp;·&nbsp; 10 Tools Reviewed</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     KPI STRIP
+══════════════════════════════════ -->
+<div class="kpi-strip">
+  <div class="kpi">
+    <span class="kpi-label">Tools Reviewed</span>
+    <span class="kpi-value">10</span>
+    <span class="kpi-note">6 SCORM · 4 AI-powered</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">SAP SF Compatible</span>
+    <span class="kpi-value" style="color:var(--teal);">9/10</span>
+    <span class="kpi-note">1 needs UAT validation</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Single-User Cost Range</span>
+    <span class="kpi-value">€355</span>
+    <span class="kpi-note">to €1,713 / year</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Enterprise (Team) Range</span>
+    <span class="kpi-value">€844</span>
+    <span class="kpi-note">to €1,522 /user/year</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Free License Transfer</span>
+    <span class="kpi-value">5/10</span>
+    <span class="kpi-note">5 require admin action</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MAIN
+══════════════════════════════════ -->
+<div class="main">
+
+  <!-- TABLE SECTION -->
+  <div>
+    <div class="sec-label">
+      <span class="sec-label-text">Full Market Comparison</span>
+    </div>
+
+    <div class="card">
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="fbtn active" onclick="setFilter('all',this)">All Tools</button>
+        <button class="fbtn" onclick="setFilter('scorm',this)">SCORM Authoring</button>
+        <button class="fbtn" onclick="setFilter('ai',this)">AI Generators</button>
+      </div>
+      <div class="tbl-wrap">
+        <table id="mainTable">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Category</th>
+              <th>Key Strengths</th>
+              <th>Key Limitations</th>
+              <th>Learning Curve</th>
+              <th>Single User / yr</th>
+              <th>Enterprise Team / yr</th>
+              <th>License Transfer</th>
+              <th>SAP SF LMS</th>
+            </tr>
+          </thead>
+          <tbody id="tablebody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW: Charts + Recs -->
+  <div class="bottom-row">
+
+    <!-- COST CHART -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Annual cost per seat — single user vs enterprise team</span>
+        <span class="card-note">EUR · converted at 1 USD = €0.87 (March 2026)</span>
+      </div>
+      <div class="chart-inner">
+        <div class="legend">
+          <span class="leg"><span class="leg-sq" style="background:#00c4a0;"></span>Single user / yr</span>
+          <span class="leg"><span class="leg-sq" style="background:#3b82f6;"></span>Enterprise team / yr</span>
+        </div>
+        <div style="position:relative;height:300px;">
+          <canvas id="costChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Recommended by use case</span>
+        <span class="card-note">GL&T guidance · Q1 2026</span>
+      </div>
+      <div class="recs-grid" id="recsGrid"></div>
+    </div>
+
+  </div>
+
+  <!-- NOTICE -->
+  <div class="notice">
+    <span class="notice-icon">⚠</span>
+    <span>
+      <strong style="color:var(--text);">Pricing note:</strong> All figures converted to EUR at 1 USD = €0.87 (March 2026 mid-market rate). Published list prices Q1 2026 — enterprise contracts are individually negotiated and volume discounts of 15–30% are typical for 25+ seats. SAP SuccessFactors LMS accepts SCORM 1.2 (recommended), SCORM 2004 (limited sequencing), xAPI, and AICC. Always test SCORM packages in a SF UAT environment before production deployment.
+    </span>
+  </div>
+
+</div>
+
+<script>
+const TOOLS = [
+  {
+    name:"Articulate 360",vendor:"Articulate",cat:"scorm",catLabel:"SCORM",
+    pros:["Industry's #1 tool — largest community & template library","Storyline: rich branching & interactions; Rise: rapid responsive courses","SCORM 1.2/2004, xAPI, AICC export","Built-in stakeholder review (Review 360)"],
+    cons:["Storyline is Windows-only desktop app","No real-time co-authoring in Storyline","Named-user only — no perpetual option"],
+    curve:"Moderate",curveCls:"c-mod",
+    singleUser:"€1,043",singleNote:"Standard personal plan (~$1,199 USD)",
+    entTeam:"€1,304",entNote:"Teams plan · AI tier: €1,522/user/yr",
+    singleRaw:1043,entRaw:1304,
+    licenseLabel:"Admin reassign",licenseCls:"lic-admin",licenseNote:"Named-user. Admin can reassign seats; not a free pool.",
+    sapLabel:"✓ Fully compatible",sapCls:"sap-full",sapNote:"SCORM 1.2/2004/xAPI tested on SF LMS"
+  },
+  {
+    name:"Adobe Captivate",vendor:"Adobe",cat:"scorm",catLabel:"SCORM",
+    pros:["Best software simulations & click-through demos","VR / 360° immersive learning support","Broadest standard support (SCORM/xAPI/AICC)","Adobe Firefly AI image generation (2023+ version)"],
+    cons:["Steepest learning curve of all tools","Classic version discontinued 2028; new version maturing","Slow & unstable on large complex projects"],
+    curve:"Steep",curveCls:"c-steep",
+    singleUser:"€355",singleNote:"~€29/month billed annually (~$408 USD)",
+    entTeam:"€355",entNote:"Same rate — volume pricing on request",
+    singleRaw:355,entRaw:355,
+    licenseLabel:"Admin reassign",licenseCls:"lic-admin",licenseNote:"Adobe CC named-user. Deactivate/reassign via Admin Console.",
+    sapLabel:"✓ Fully compatible",sapCls:"sap-full",sapNote:"SCORM 1.2/2004 packages tested on SF LMS"
+  },
+  {
+    name:"iSpring Suite",vendor:"iSpring Solutions",cat:"scorm",catLabel:"SCORM",
+    pros:["PowerPoint add-in — almost no learning curve","14 quiz types, dialogue simulations","SAP SF dedicated integration page — validated","24/7 human support; best-rated customer service"],
+    cons:["Less advanced interactivity than Storyline","Windows-only desktop app","Output can feel 'slide-heavy' without design discipline"],
+    curve:"Easy",curveCls:"c-easy",
+    singleUser:"€844",singleNote:"Suite · Max with AI: €1,122/yr (~$970/$1,290 USD)",
+    entTeam:"€844",entNote:"Per-author; enterprise volume pricing on request",
+    singleRaw:844,entRaw:844,
+    licenseLabel:"✓ Transferable",licenseCls:"lic-free",licenseNote:"Deactivate on one machine, activate on another. Central enterprise admin.",
+    sapLabel:"✓ Fully validated",sapCls:"sap-native",sapNote:"Dedicated SAP SF integration page & tested"
+  },
+  {
+    name:"Lectora",vendor:"ELB Learning",cat:"scorm",catLabel:"SCORM",
+    pros:["Best-in-class accessibility (WCAG 2.1 / Section 508)","Full HTML/CSS/JS control for advanced customisation","Broadest standard support — SCORM/xAPI/AICC/PENS","Gamification & VR 360° built in"],
+    cons:["Dated UI — not intuitive for beginners","Smaller community than Articulate","Pricing less transparent; requires sales contact"],
+    curve:"Steep",curveCls:"c-steep",
+    singleUser:"~€782",singleNote:"Silver tier incl. maintenance (~$899 USD)",
+    entTeam:"~€782+",entNote:"Enterprise via sales; cloud (Lectora Online) also available",
+    singleRaw:782,entRaw:782,
+    licenseLabel:"Admin reassign",licenseCls:"lic-admin",licenseNote:"Desktop: machine-tied, transferable with vendor support. Cloud: admin-managed.",
+    sapLabel:"✓ Fully compatible",sapCls:"sap-full",sapNote:"All SCORM/xAPI/AICC standards accepted by SF LMS"
+  },
+  {
+    name:"dominKnow ONE",vendor:"dominKnow",cat:"scorm",catLabel:"SCORM",
+    pros:["True real-time multi-author cloud collaboration","Slide-based + responsive authoring in one platform","Strong content reuse & shared asset libraries","Floating-style seat admin — best licence flexibility"],
+    cons:["Smaller community & fewer templates","Dual-mode UI complex for beginners","Pricing requires demo/sales quote"],
+    curve:"Moderate",curveCls:"c-mod",
+    singleUser:"~€870",singleNote:"Estimated; contact sales for quote (~$1,000 USD)",
+    entTeam:"~€870–1,740",entNote:"Per user; volume discounts for 10+ seats",
+    singleRaw:870,entRaw:870,
+    licenseLabel:"✓ Transferable",licenseCls:"lic-free",licenseNote:"Cloud SaaS: admin reassigns seats instantly. True floating within pool.",
+    sapLabel:"✓ Fully compatible",sapCls:"sap-full",sapNote:"SCORM/xAPI packages export directly for SF LMS upload"
+  },
+  {
+    name:"SAP Enable Now",vendor:"SAP",cat:"scorm",catLabel:"SAP Native",
+    pros:["Deepest native SF LMS integration — direct publish API","In-app contextual guidance overlays for SAP transactions","Best for SAP application & process training","Single-vendor alignment with SF ecosystem"],
+    cons:["Best suited for SAP training, not general L&D","Very complex setup; steep learning curve","Enterprise bundle pricing only — no published rate"],
+    curve:"Steep",curveCls:"c-steep",
+    singleUser:"Custom",singleNote:"Part of SAP enterprise agreement",
+    entTeam:"Custom",entNote:"Typically €10,000+ annual commitment",
+    singleRaw:0,entRaw:0,
+    licenseLabel:"SAP managed",licenseCls:"lic-admin",licenseNote:"Named-user within SAP enterprise agreement. Admin-controlled.",
+    sapLabel:"★ Native API",sapCls:"sap-native",sapNote:"Direct publish to SF LMS. SCORM export also available."
+  },
+  {
+    name:"Synthesia",vendor:"Synthesia.io",cat:"ai",catLabel:"AI Video",
+    pros:["230+ AI avatars, 160+ languages, zero video production cost","1-click translation to 80+ languages","SCORM 1.2 export with confirmed SF LMS compatibility","SOC 2 Type II & GDPR compliant"],
+    cons:["SCORM export locked to Enterprise tier only","Limited branching / quiz authoring vs dedicated tools","Custom avatars are expensive add-ons (~€870+/yr each)"],
+    curve:"Very Easy",curveCls:"c-easy",
+    singleUser:"~€700",singleNote:"Creator: ~€58/mo billed annually — no SCORM (~$804 USD)",
+    entTeam:"Custom",entNote:"Enterprise (SCORM + SF): ~€13K–€43K+/yr for team",
+    singleRaw:700,entRaw:0,
+    licenseLabel:"✓ Workspace model",licenseCls:"lic-free",licenseNote:"Enterprise: admin manages workspace seats. Flexible sharing within contract.",
+    sapLabel:"✓ Confirmed",sapCls:"sap-full",sapNote:"Enterprise tier. SCORM 1.2 + completion tracking confirmed on SF LMS"
+  },
+  {
+    name:"Easygenerator",vendor:"Kahoot! Group",cat:"ai",catLabel:"AI Authoring",
+    pros:["Built for subject matter experts (SMEs), not IDs","AI generates outlines & course drafts from text prompts","Real-time collaboration; SCORM & xAPI export","Strong learner analytics & auto-translation"],
+    cons:["No complex branching or advanced interactivity","AI output requires significant human review","High cost relative to output complexity","No video or simulation authoring"],
+    curve:"Easy",curveCls:"c-easy",
+    singleUser:"~€1,127",singleNote:"~€94/user/month billed annually (~$1,296 USD)",
+    entTeam:"Custom",entNote:"50+ users: enterprise pricing on request",
+    singleRaw:1127,entRaw:0,
+    licenseLabel:"✓ Transferable",licenseCls:"lic-free",licenseNote:"Cloud SaaS. Admin assigns/revokes access instantly. No machine binding.",
+    sapLabel:"✓ Compatible",sapCls:"sap-full",sapNote:"SCORM & xAPI export uploads cleanly to SF LMS"
+  },
+  {
+    name:"Articulate 360 AI",vendor:"Articulate",cat:"ai",catLabel:"AI-Enhanced",
+    pros:["AI generation embedded in industry-leading authoring suite","AI text, imagery, quizzes, translations & avatar narration","Same full SCORM/xAPI output as standard 360","Best option if team already uses Articulate"],
+    cons:["AI is an add-on layer; less powerful for pure generation speed","Premium on top of already high base subscription","Windows-only for Storyline component"],
+    curve:"Moderate",curveCls:"c-mod",
+    singleUser:"€1,261",singleNote:"AI personal plan (~$1,449 USD)",
+    entTeam:"€1,522",entNote:"AI Teams plan (~$1,749 USD) — published list 2025/26",
+    singleRaw:1261,entRaw:1522,
+    licenseLabel:"Admin reassign",licenseCls:"lic-admin",licenseNote:"Named-user. Same model as standard Articulate 360.",
+    sapLabel:"✓ Fully compatible",sapCls:"sap-full",sapNote:"Identical SCORM/xAPI output to standard 360. No compatibility difference."
+  },
+  {
+    name:"Coursebox AI",vendor:"Coursebox",cat:"ai",catLabel:"AI Generator",
+    pros:["Fastest course generation: document/PDF/video → draft in seconds","SCORM export available for LMS upload","Most affordable AI generator for high-volume needs","Drag-and-drop editing post-generation"],
+    cons:["Output quality requires significant human editing","Basic interactions only — no complex branching","Not specifically validated against SF LMS","Limited enterprise support ecosystem"],
+    curve:"Very Easy",curveCls:"c-easy",
+    singleUser:"~€866",singleNote:"Business plan ~€72/month billed annually (~$996 USD)",
+    entTeam:"Custom",entNote:"Enterprise pricing on request",
+    singleRaw:866,entRaw:0,
+    licenseLabel:"✓ Transferable",licenseCls:"lic-free",licenseNote:"Cloud SaaS. Admin assigns/revokes in real time. No machine binding.",
+    sapLabel:"⚡ Test UAT",sapCls:"sap-partial",sapNote:"SCORM export available but not validated on SF LMS — test before deploying"
+  }
+];
+
+const RECS = [
+  {use:"Full SAP ecosystem",tool:"SAP Enable Now",why:"Native publish API to SF LMS. Best for SAP process & application training."},
+  {use:"Complex interactivity",tool:"Articulate Storyline 360",why:"Industry-leading branching, triggers & scenario-based learning."},
+  {use:"SME-driven authoring",tool:"iSpring Suite",why:"PowerPoint-based, minimal training needed. Lowest barrier for subject-matter experts. SF validated."},
+  {use:"AI video & multilingual",tool:"Synthesia Enterprise",why:"160+ languages, 1-click translation. Only AI video tool with confirmed SF LMS SCORM integration."},
+  {use:"Accessibility compliance",tool:"Lectora",why:"WCAG 2.1 + Section 508 certified. Essential for regulated industries."},
+  {use:"Team co-authoring",tool:"dominKnow ONE",why:"True real-time cloud collaboration with best licence flexibility for team reallocation."},
+  {use:"Rapid content at scale",tool:"Coursebox AI + iSpring",why:"Coursebox AI generates first drafts from documents; iSpring publishes as polished SCORM."},
+  {use:"Budget-conscious",tool:"Adobe Captivate",why:"Lowest per-seat cost (~$408/yr) of enterprise-grade tools. Factor in steeper training investment."},
+];
+
+let activeFilter = 'all';
+
+function curveSortVal(c){ return {Easy:0,'Very Easy':0,Moderate:1,Steep:2}[c]??1; }
+
+function renderTable(){
+  const data = TOOLS.filter(t => activeFilter==='all' || t.cat===activeFilter);
+  const tb = document.getElementById('tablebody');
+  tb.innerHTML = data.map(t=>`
+    <tr data-cat="${t.cat}">
+      <td>
+        <div class="tool-cell">
+          <span class="tool-name">${t.name}</span>
+          <span class="tool-vendor">${t.vendor}</span>
+        </div>
+      </td>
+      <td>
+        <span class="type-badge ${t.cat==='scorm'?(t.catLabel==='SAP Native'?'tb-native':'tb-scorm'):'tb-ai'}">
+          ${t.catLabel}
+        </span>
+      </td>
+      <td style="max-width:200px;">
+        <ul class="pc-list">
+          ${t.pros.slice(0,3).map(p=>`<li><span class="pro-dot">+</span>${p}</li>`).join('')}
+        </ul>
+      </td>
+      <td style="max-width:180px;">
+        <ul class="pc-list">
+          ${t.cons.slice(0,2).map(c=>`<li><span class="con-dot">−</span>${c}</li>`).join('')}
+        </ul>
+      </td>
+      <td><span class="curve ${t.curveCls}">${t.curve}</span></td>
+      <td>
+        <div class="cost-single">${t.singleUser}</div>
+        <div class="cost-note">${t.singleNote}</div>
+      </td>
+      <td>
+        <div class="cost-single" style="color:#7eb3f8">${t.entTeam}</div>
+        <div class="cost-note">${t.entNote}</div>
+      </td>
+      <td>
+        <span class="lic ${t.licenseCls}">${t.licenseLabel}</span>
+        <div class="cost-note" style="margin-top:4px;max-width:140px;">${t.licenseNote}</div>
+      </td>
+      <td>
+        <span class="sap ${t.sapCls}">${t.sapLabel}</span>
+        <div class="cost-note" style="margin-top:4px;max-width:140px;">${t.sapNote}</div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function setFilter(f, el){
+  activeFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function renderRecs(){
+  document.getElementById('recsGrid').innerHTML = RECS.map(r=>`
+    <div class="rec-item">
+      <div class="rec-use">${r.use}</div>
+      <div class="rec-tool">${r.tool}</div>
+      <div class="rec-why">${r.why}</div>
+    </div>
+  `).join('');
+}
+
+function renderChart(){
+  new Chart(document.getElementById('costChart'),{
+    type:'bar',
+    data:{
+      labels: TOOLS.map(t=>t.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {
+          label:'Single user / yr',
+          data: TOOLS.map(t=>t.singleRaw||0),
+          backgroundColor:'rgba(0,196,160,0.75)',
+          borderRadius:3,
+          borderSkipped:false
+        },
+        {
+          label:'Enterprise team / yr',
+          data: TOOLS.map(t=>t.entRaw||0),
+          backgroundColor:'rgba(59,130,246,0.55)',
+          borderRadius:3,
+          borderSkipped:false
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label: ctx => {
+              const v = ctx.raw;
+              return v===0 ? `${ctx.dataset.label}: Custom — contact sales` : `${ctx.dataset.label}: €${v.toLocaleString()}/yr`;
+            }
+          },
+          backgroundColor:'rgba(13,31,45,.95)',
+          borderColor:'rgba(0,196,160,.3)',
+          borderWidth:1,
+          titleColor:'#fff',
+          bodyColor:'#7a9ab0'
+        }
+      },
+      scales:{
+        x:{
+          ticks:{color:'#7a9ab0',font:{size:10},maxRotation:35},
+          grid:{color:'rgba(255,255,255,.04)'}
+        },
+        y:{
+          ticks:{
+            color:'#7a9ab0',
+            font:{size:10},
+            callback: v => v===0?'':('€'+v.toLocaleString())
+          },
+          grid:{color:'rgba(255,255,255,.06)'}
+        }
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderTable();
+  renderRecs();
+  renderChart();
+});
+</script>
+</body>
+</html>
